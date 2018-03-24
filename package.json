@@ -1,0 +1,26 @@
+{
+  "name": "ts-code-generator",
+  "version": "1.0.0",
+  "description": "Generates Typescript code programatically",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jmulet/tsgen.git"
+  },
+  "keywords": [
+    "Typecript",
+    "Generator"
+  ],
+  "author": "Josep Mulet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jmulet/ts-code-generator/issues"
+  },
+  "homepage": "https://github.com/jmulet/ts-code-generator#readme",
+  "dependencies": {
+    "@types/node": "^9.6.0"
+  }
+}
