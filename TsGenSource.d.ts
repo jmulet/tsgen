@@ -11,5 +11,5 @@ export declare class TsGenSource {
     addClass(tsGenClass: TsGenClass): void;
     addFunction(tsGenFunc: TsGenFunc): void;
     toString(): string;
-    save(): void;
+    save(): Promise<void>;
 }

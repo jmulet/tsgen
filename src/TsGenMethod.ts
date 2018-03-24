@@ -4,14 +4,16 @@ import { printParameters } from "./TsGenUtil";
 export class TsGenMethod {
     name: string;
     visibility: "" | "public" | "private";
+    returns = "";
     private parameters: TsGenParam[];
     private body = [];
     private decorators: string[] = [];
 
-    constructor(name, visibility?: "" | "public" | "private") {
+    constructor(name, visibility?: "" | "public" | "private", returns?: string) {
         this.parameters = new Array<TsGenParam>();
         this.name = name;
         this.visibility = visibility || "";
+        this.returns = returns || "";
     }
 
     addParameter(param: TsGenParam) {
@@ -34,7 +36,9 @@ export class TsGenMethod {
 
     toString() {
         const bloc1 = [ (this.visibility? this.visibility: "") 
-                        + this.name + "(" + printParameters(this.parameters) + ") {"
+                        + this.name + "(" + printParameters(this.parameters) + ")"+
+                        + (this.returns? (": "+this.returns) : "" ) 
+                        + " {"
         ]; 
         
         return [...this.decorators, ...bloc1, ...this.body.map(s=>s.toString() || s), ...["}"]].join("\n");

@@ -2,6 +2,7 @@ import { TsGenImport } from "./TsGenImport";
 import { TsGenClass } from "./TsGenClass";
 import { TsGenFunc } from "./TsGenFunc";
 import * as fs from 'fs';
+import { exec } from 'child_process';
 
 export class TsGenSource {
     private path: string;
@@ -50,10 +51,25 @@ export class TsGenSource {
         const bloc2 = this.functions.map( (c) => c.toString() + "\n" );
         const bloc3 = this.classes.map( (c) => c.toString()  + "\n" );
         const blocs = [... bloc1, ...[""], ...bloc2, ...bloc3];
-        return blocs.join("\n");
+        const raw = blocs.join("\n");
+        //Beautify the
+        return raw;
     }
 
-    save(): void {
-        fs.writeFileSync(this.path, this.toString());
+    async save() {
+        const src = this.toString();
+        console.log("Writing to ", src);
+        fs.writeFileSync(this.path, src);
+        exec('../node_modules/typescript-formatter/bin/tsfmt -r ' + this.path, (err, stdout, stderr) => {
+            console.log("Prettyfing ts");
+            if (err) {
+              // node couldn't execute the command
+              console.log(err);
+              return;
+            }  
+            // the *entire* stdout and stderr (buffered)
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+          });
     }
 }

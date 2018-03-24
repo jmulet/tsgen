@@ -2,12 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const TsGenUtil_1 = require("./TsGenUtil");
 class TsGenMethod {
-    constructor(name, visibility) {
+    constructor(name, visibility, returns) {
+        this.returns = "";
         this.body = [];
         this.decorators = [];
         this.parameters = new Array();
         this.name = name;
         this.visibility = visibility || "";
+        this.returns = returns || "";
     }
     addParameter(param) {
         // Check if not already defined
@@ -27,7 +29,9 @@ class TsGenMethod {
     }
     toString() {
         const bloc1 = [(this.visibility ? this.visibility : "")
-                + this.name + "(" + TsGenUtil_1.printParameters(this.parameters) + ") {"
+                + this.name + "(" + TsGenUtil_1.printParameters(this.parameters) + ")" +
+                +(this.returns ? (": " + this.returns) : "")
+                + " {"
         ];
         return [...this.decorators, ...bloc1, ...this.body.map(s => s.toString() || s), ...["}"]].join("\n");
     }
