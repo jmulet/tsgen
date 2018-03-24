@@ -5,7 +5,7 @@
 Generate typescript code programatically.
  
 ### Installation:
-npm install --save tsgen
+npm install --save tsgen2
 
 ### Usage:
 
@@ -13,7 +13,7 @@ Start creating a source generator object:
 
 ```javascript
 import * as path from 'path'
-import { TsGenSource } from 'tsgen/TsGenSource'
+import { TsGenSource } from 'tsgen2/TsGenSource'
 
 const file = path.resolve("./file.ts")
 const source = new TsGenSource(file)

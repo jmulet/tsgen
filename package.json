@@ -1,6 +1,6 @@
 {
-  "name": "ts-code-generator",
-  "version": "1.0.0",
+  "name": "tsgen2",
+  "version": "1.0.1",
   "description": "Generates Typescript code programatically",
   "main": "index.js",
   "scripts": {
@@ -17,9 +17,9 @@
   "author": "Josep Mulet",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jmulet/ts-code-generator/issues"
+    "url": "https://github.com/jmulet/tsgen/issues"
   },
-  "homepage": "https://github.com/jmulet/ts-code-generator#readme",
+  "homepage": "https://github.com/jmulet/tsgen#readme",
   "dependencies": {
     "@types/node": "^9.6.0",
     "typescript-formatter": "^7.1.0"
