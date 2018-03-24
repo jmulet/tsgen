@@ -12,7 +12,10 @@ npm install --save tsgen
 Start creating a source generator object:
 
 ```javascript
-const file = "./file.ts"
+import * as path from 'path'
+import { TsGenSource } from 'tsgen/TsGenSource'
+
+const file = path.resolve("./file.ts")
 const source = new TsGenSource(file)
 ```
 
