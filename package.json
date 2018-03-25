@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/jmulet/tsgen#readme",
   "dependencies": {
-    "@types/node": "^9.6.0",
-    "typescript-formatter": "^7.1.0"
+    "@types/node": "^9.6.0"
   }
 }

@@ -19,10 +19,14 @@ class TsGenConstructor {
     addToBody(sentence) {
         this.body.push(sentence);
     }
-    toString() {
-        const bloc1 = ["constructor(" + TsGenUtil_1.printParameters(this.parameters) + ") {"
-        ];
-        return [...bloc1, ...this.body.map(s => s.toString() || s), ...["}"]].join("\n");
+    toString(indent = 0) {
+        return TsGenUtil_1.flatenArrayTree(this.toArrayTree(), indent);
+    }
+    toArrayTree() {
+        const header = "constructor(" + TsGenUtil_1.printParameters(this.parameters) + ") {";
+        return [header,
+            this.body.map(s => s.toArrayTree ? s.toArrayTree() : s),
+            "}"];
     }
 }
 exports.TsGenConstructor = TsGenConstructor;

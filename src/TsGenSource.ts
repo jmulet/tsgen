@@ -1,29 +1,45 @@
 import { TsGenImport } from "./TsGenImport";
 import { TsGenClass } from "./TsGenClass";
 import { TsGenFunc } from "./TsGenFunc";
-import * as fs from 'fs';
-import { exec } from 'child_process';
+import * as fs from 'fs'; 
+import { flatenArrayTree, Treeable } from "./TsGenUtil";
 
-export class TsGenSource {
+export interface TsGenSourceOptions {
+    indent: string;
+}
+
+export class TsGenSource implements Treeable {
+    opts: any;
     private path: string;
     private imports: Array<TsGenImport>;  
     private classes: Array<TsGenClass>;
     private functions: Array<TsGenFunc>;
 
-    constructor(path: string) {
+    constructor(path: string, opts?: TsGenSourceOptions) {
         this.path = path;
         this.imports = new Array<TsGenImport>();
         this.classes = new Array<TsGenClass>();
         this.functions = new Array<TsGenFunc>();
+        this.opts = opts || {};
+        this.opts.indent = this.opts.indent || "   ";
     }
     addImport(tsGenImport: TsGenImport) {
         // Check if not already defined
-        const found = this.imports.filter((imp) => tsGenImport.importable === imp.importable).length;
-        if (found === 0) {
-            this.imports.push(tsGenImport);
-        } else {
-            console.log("Error: TsGenSource.addImport ", tsGenImport.importable, " already imported." );
-        }
+        tsGenImport.importables.forEach( (e) =>  {
+            const found = this.imports.filter((imp) => imp.has(e)).length;
+            if (found === 0) {
+                // Now check if a new import is required or can be appended to a given one
+                const lines = this.imports.filter( (x) => x.fromSource === tsGenImport.fromSource);
+                if (lines.length === 0) {
+                    this.imports.push(tsGenImport);
+                } else {
+                    lines[0].addImportable(tsGenImport);
+                }
+            } else {
+                console.log("Error: TsGenSource.addImport ", e, " already imported." );
+            }
+
+        });
     }
 
     addClass(tsGenClass: TsGenClass) {
@@ -46,30 +62,20 @@ export class TsGenSource {
         }
     }
 
-    toString(): string {
-        const bloc1 = this.imports.map( (imp) => imp.toString() );
-        const bloc2 = this.functions.map( (c) => c.toString() + "\n" );
-        const bloc3 = this.classes.map( (c) => c.toString()  + "\n" );
-        const blocs = [... bloc1, ...[""], ...bloc2, ...bloc3];
-        const raw = blocs.join("\n");
-        //Beautify the
-        return raw;
+    toString(level: number = 0): string {
+        return flatenArrayTree(this.toArrayTree(), level, this.opts.indent);
+    }
+
+    toArrayTree(): Array<any> {
+        const bloc1 = this.imports.map( (imp) => imp.toArrayTree() );
+        const bloc2 = this.functions.map( (fun) => fun.toArrayTree()  );
+        const bloc3 = this.classes.map( (clazz) => clazz.toArrayTree() );
+        const blocs = [...bloc1, "", ...bloc2, ...bloc3];        
+        return blocs;
     }
 
     async save() {
-        const src = this.toString();
-        console.log("Writing to ", src);
-        fs.writeFileSync(this.path, src);
-        exec('../node_modules/typescript-formatter/bin/tsfmt -r ' + this.path, (err, stdout, stderr) => {
-            console.log("Prettyfing ts");
-            if (err) {
-              // node couldn't execute the command
-              console.log(err);
-              return;
-            }  
-            // the *entire* stdout and stderr (buffered)
-            console.log(`stdout: ${stdout}`);
-            console.log(`stderr: ${stderr}`);
-          });
+        const src = this.toString(); 
+        fs.writeFileSync(this.path, src); 
     }
 }

@@ -9,23 +9,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
-const child_process_1 = require("child_process");
+const TsGenUtil_1 = require("./TsGenUtil");
 class TsGenSource {
-    constructor(path) {
+    constructor(path, opts) {
         this.path = path;
         this.imports = new Array();
         this.classes = new Array();
         this.functions = new Array();
+        this.opts = opts || {};
+        this.opts.indent = this.opts.indent || "   ";
     }
     addImport(tsGenImport) {
         // Check if not already defined
-        const found = this.imports.filter((imp) => tsGenImport.importable === imp.importable).length;
-        if (found === 0) {
-            this.imports.push(tsGenImport);
-        }
-        else {
-            console.log("Error: TsGenSource.addImport ", tsGenImport.importable, " already imported.");
-        }
+        tsGenImport.importables.forEach((e) => {
+            const found = this.imports.filter((imp) => imp.has(e)).length;
+            if (found === 0) {
+                // Now check if a new import is required or can be appended to a given one
+                const lines = this.imports.filter((x) => x.fromSource === tsGenImport.fromSource);
+                if (lines.length === 0) {
+                    this.imports.push(tsGenImport);
+                }
+                else {
+                    lines[0].addImportable(tsGenImport);
+                }
+            }
+            else {
+                console.log("Error: TsGenSource.addImport ", e, " already imported.");
+            }
+        });
     }
     addClass(tsGenClass) {
         // Check if not already defined
@@ -47,31 +58,20 @@ class TsGenSource {
             console.log("Error: TsGenSource.addFunction ", tsGenFunc.name, " already defined.");
         }
     }
-    toString() {
-        const bloc1 = this.imports.map((imp) => imp.toString());
-        const bloc2 = this.functions.map((c) => c.toString() + "\n");
-        const bloc3 = this.classes.map((c) => c.toString() + "\n");
-        const blocs = [...bloc1, ...[""], ...bloc2, ...bloc3];
-        const raw = blocs.join("\n");
-        //Beautify the
-        return raw;
+    toString(level = 0) {
+        return TsGenUtil_1.flatenArrayTree(this.toArrayTree(), level, this.opts.indent);
+    }
+    toArrayTree() {
+        const bloc1 = this.imports.map((imp) => imp.toArrayTree());
+        const bloc2 = this.functions.map((fun) => fun.toArrayTree());
+        const bloc3 = this.classes.map((clazz) => clazz.toArrayTree());
+        const blocs = [...bloc1, "", ...bloc2, ...bloc3];
+        return blocs;
     }
     save() {
         return __awaiter(this, void 0, void 0, function* () {
             const src = this.toString();
-            console.log("Writing to ", src);
             fs.writeFileSync(this.path, src);
-            child_process_1.exec('../node_modules/typescript-formatter/bin/tsfmt -r ' + this.path, (err, stdout, stderr) => {
-                console.log("Prettyfing ts");
-                if (err) {
-                    // node couldn't execute the command
-                    console.log(err);
-                    return;
-                }
-                // the *entire* stdout and stderr (buffered)
-                console.log(`stdout: ${stdout}`);
-                console.log(`stderr: ${stderr}`);
-            });
         });
     }
 }

@@ -1,15 +1,15 @@
 import { TsGenParam } from "./TsGenParam";
-import { printParameters } from "./TsGenUtil";
+import { printParameters, flatenArrayTree, Treeable } from "./TsGenUtil";
 
-export class TsGenMethod {
+export class TsGenMethod implements Treeable {
     name: string;
-    visibility: "" | "public" | "private";
+    visibility: "" | "public" | "private" | "protected";
     returns: string;
-    private parameters: TsGenParam[];
-    private body = [];
-    private decorators: string[] = [];
+    protected parameters: TsGenParam[];
+    protected body: Treeable[] = [];
+    protected decorators: string[] = [];
 
-    constructor(name, visibility?: "" | "public" | "private", returns?: string) {
+    constructor(name, visibility?: "" | "public" | "private" | "protected", returns?: string) {
         this.parameters = new Array<TsGenParam>();
         this.name = name;
         this.visibility = visibility || "";
@@ -30,17 +30,23 @@ export class TsGenMethod {
         this.body.push(sentence);
     }
 
-    addToDecorator(decorator: any) {
+    addDecorator(decorator: any) {
         this.decorators.push(decorator);
     }
 
-    toString() {
-        const bloc1 = [ (this.visibility? this.visibility: "") 
+    toString(indent: number = 0): string {
+        return flatenArrayTree(this.toArrayTree(), indent);
+    }
+
+    toArrayTree(): Array<any> {
+        
+        const header =  (this.visibility? (this.visibility+" "): "") 
                         + this.name + "(" + printParameters(this.parameters) + ")"
                         + (this.returns? (": "+this.returns) : "" ) 
-                        + " {"
-        ]; 
-        
-        return [...this.decorators, ...bloc1, ...this.body.map(s=>s.toString() || s), "}"].join("\n");
+                        + " {";
+    
+        const body =  this.body.map(s => s.toArrayTree? s.toArrayTree() : s);   
+             
+        return  [...this.decorators, header, body, "}"];            
     }
 }

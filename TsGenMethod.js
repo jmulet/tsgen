@@ -23,16 +23,19 @@ class TsGenMethod {
     addToBody(sentence) {
         this.body.push(sentence);
     }
-    addToDecorator(decorator) {
+    addDecorator(decorator) {
         this.decorators.push(decorator);
     }
-    toString() {
-        const bloc1 = [(this.visibility ? this.visibility : "")
-                + this.name + "(" + TsGenUtil_1.printParameters(this.parameters) + ")"
-                + (this.returns ? (": " + this.returns) : "")
-                + " {"
-        ];
-        return [...this.decorators, ...bloc1, ...this.body.map(s => s.toString() || s), "}"].join("\n");
+    toString(indent = 0) {
+        return TsGenUtil_1.flatenArrayTree(this.toArrayTree(), indent);
+    }
+    toArrayTree() {
+        const header = (this.visibility ? (this.visibility + " ") : "")
+            + this.name + "(" + TsGenUtil_1.printParameters(this.parameters) + ")"
+            + (this.returns ? (": " + this.returns) : "")
+            + " {";
+        const body = this.body.map(s => s.toArrayTree ? s.toArrayTree() : s);
+        return [...this.decorators, header, body, "}"];
     }
 }
 exports.TsGenMethod = TsGenMethod;

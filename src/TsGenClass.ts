@@ -2,8 +2,9 @@ import { TsGenClassOptions } from "./TsGenClassOptions";
 import { TsGenDeclaration } from "./TsGenDeclaration";
 import { TsGenMethod } from "./TsGenMethod";
 import { TsGenConstructor } from "./TsGenConstructor";
+import { flatenArrayTree, Treeable } from "./TsGenUtil";
 
-export class TsGenClass {
+export class TsGenClass implements Treeable {
     options: TsGenClassOptions;
     name: string;
     private declarations: TsGenDeclaration[];
@@ -46,19 +47,22 @@ export class TsGenClass {
        this.decorators.push(decorator);
    }
 
-   toString(): string { 
-        const bloc2 = [
-            (this.options.exportable? "export ": "") +
-            "class " + this.name + " { "
-        ];
-        const bloc3 = this.declarations.map((dec) => dec.toString() );
+   toString(indent: number = 0): string {
+        return flatenArrayTree(this.toArrayTree(), indent);
+    }
+
+    toArrayTree(): Array<any> {
+        const header = (this.options.exportable? "export ": "") +
+                       "class " + this.name + " { ";
+
+        const bloc3 = this.declarations.map((dec) => dec.toArrayTree() );
         let bloc4 = [];
         if (this.constructorDef) {
-            bloc4 = [ this.constructorDef.toString() ];
+            bloc4 = [ this.constructorDef.toArrayTree() ];
         } 
-        const bloc5 = this.methods.map((m) => m.toString() + "\n");
-        const blocn = ["}"];
+        const bloc5 = this.methods.map((m) => m.toArrayTree() );
+        const blocn = "}";
 
-        return [...this.decorators, ...bloc2, ...bloc3, ...bloc4, ...bloc5, ...blocn].join("\n");
+        return [...this.decorators, header, ...bloc3, ...bloc4, ...bloc5, blocn];
     }
 }

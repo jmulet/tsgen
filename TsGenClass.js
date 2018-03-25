@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const TsGenUtil_1 = require("./TsGenUtil");
 class TsGenClass {
     constructor(name, options) {
         this.decorators = [];
@@ -34,19 +35,20 @@ class TsGenClass {
     addDecorator(decorator) {
         this.decorators.push(decorator);
     }
-    toString() {
-        const bloc2 = [
-            (this.options.exportable ? "export " : "") +
-                "class " + this.name + " { "
-        ];
-        const bloc3 = this.declarations.map((dec) => dec.toString());
+    toString(indent = 0) {
+        return TsGenUtil_1.flatenArrayTree(this.toArrayTree(), indent);
+    }
+    toArrayTree() {
+        const header = (this.options.exportable ? "export " : "") +
+            "class " + this.name + " { ";
+        const bloc3 = this.declarations.map((dec) => dec.toArrayTree());
         let bloc4 = [];
         if (this.constructorDef) {
-            bloc4 = [this.constructorDef.toString()];
+            bloc4 = [this.constructorDef.toArrayTree()];
         }
-        const bloc5 = this.methods.map((m) => m.toString() + "\n");
-        const blocn = ["}"];
-        return [...this.decorators, ...bloc2, ...bloc3, ...bloc4, ...bloc5, ...blocn].join("\n");
+        const bloc5 = this.methods.map((m) => m.toArrayTree());
+        const blocn = "}";
+        return [...this.decorators, header, ...bloc3, ...bloc4, ...bloc5, blocn];
     }
 }
 exports.TsGenClass = TsGenClass;

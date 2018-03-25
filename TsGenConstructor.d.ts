@@ -1,8 +1,10 @@
 import { TsGenParam } from "./TsGenParam";
-export declare class TsGenConstructor {
+import { Treeable } from "./TsGenUtil";
+export declare class TsGenConstructor implements Treeable {
     private parameters;
     private body;
     addParameter(param: TsGenParam): void;
     addToBody(sentence: any): void;
-    toString(): string;
+    toString(indent?: number): string;
+    toArrayTree(): Array<any>;
 }
